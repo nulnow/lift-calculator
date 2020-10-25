@@ -190,9 +190,10 @@
         <aside>
           <img src="elevator.jpg" class="calculator-elevator" alt="">
           <p class="calculator-price">Цена: {{ new Intl.NumberFormat().format(price) }} {{ country.currency }}</p>
-          <el-button type="success">Рассчитать стоимость</el-button>
+          <el-button type="success" disabled>Получить КП</el-button>
         </aside>
       </div>
+      <p><small>Расчёт приблизительный, точный уточняйте у менеджера</small></p>
     </div>
   </form>
 </div>
