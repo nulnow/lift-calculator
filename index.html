@@ -1,0 +1,286 @@
+<head>
+  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<style>
+  .calculator {
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  }
+
+  .calculator .el-input-number__increase,
+  .calculator .el-input-number__decrease {
+    height: 90%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .calculator-table {
+    border-collapse: collapse;
+  }
+
+  .calculator-table td {
+    padding-bottom: 20px;
+  }
+
+  .calculator-table__label {
+    padding-right: 20px;
+    color: #616161;
+  }
+
+  .calculator-price {
+    font-size: 30px;
+  }
+
+  .calculator-row {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+  }
+
+  .calculator-row aside {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    margin-left: 10px;
+  }
+  .calculator-row aside button {
+    width: 100%;
+  }
+
+  .calculator-elevator {
+    max-width: 300px;
+  }
+
+  .calculator-container {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  @media screen and (max-width: 800px) {
+    .calculator-table tr {
+      display: flex;
+      flex-flow: column;
+    }
+  }
+</style>
+<div id="app" class="calculator">
+  <form @submit="$event.preventDefault()" method="post" action="/tmp">
+    <div class="calculator-container">
+      <h1>Калькулятор расчёта стоимости лифта</h1>
+      <div class="calculator-row">
+        <table class="calculator-table">
+          <tbody>
+          <tr>
+            <td class="calculator-table__label"><p>Тип:</p></td>
+            <td>
+              <div>
+                <el-radio-group v-model="liftType" size="mini">
+                  <el-radio-button label="Пассажирский">Пассажирский</el-radio-button>
+                  <el-radio-button label="Грузовой">Грузовой</el-radio-button>
+                  <el-radio-button label="Больничный">Больничный</el-radio-button>
+                  <el-radio-button label="Коттеджный">Коттеджный</el-radio-button>
+                  <el-radio-button label="Панорамный">Панорамный</el-radio-button>
+                  <el-radio-button label="Вакуумный">Вакуумный</el-radio-button>
+                </el-radio-group>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="calculator-table__label"><p>Страна-производитель: {{ selectedCountryName }}</p></td>
+            <td>
+              <div>
+                <el-radio-group v-model="selectedCountryName">
+                  <el-radio-button label="Россия">Россия</el-radio-button>
+                  <el-radio-button label="Европа">Европа</el-radio-button>
+                  <el-radio-button label="Турция">Турция</el-radio-button>
+                  <el-radio-button label="Китай">Китай</el-radio-button>
+                </el-radio-group>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="calculator-table__label"><p>Грузоподъемность (кг):</p></td>
+            <td>
+              <div>
+                <el-radio-group v-model="maxWeightKg" size="mini">
+                  <el-radio-button label="320">320</el-radio-button>
+                  <el-radio-button label="400">400</el-radio-button>
+                  <el-radio-button label="630">630</el-radio-button>
+                  <el-radio-button label="800">800</el-radio-button>
+                  <el-radio-button label="1000">1000</el-radio-button>
+                  <el-radio-button label="1250">1250</el-radio-button>
+                  <el-radio-button label="1600">1600</el-radio-button>
+                  <el-radio-button label="2000">2000+</el-radio-button>
+                </el-radio-group>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="calculator-table__label"><p>Количество остановок: {{ floorsNumber }}</p></td>
+            <td>
+              <div>
+                <el-slider
+                    show-stops
+                    :min="1"
+                    :max="22"
+                    :step="1"
+                    v-model="floorsNumber"
+                >
+                </el-slider>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="calculator-table__label"><p>Класс огнестойкости дверей шахты:</p></td>
+            <td>
+              <div>
+                <el-radio-group v-model="fireResistanceClass" size="small">
+                  <el-radio-button label="USUAL">Нет</el-radio-button>
+                  <el-radio-button label="RESIST">Ei60</el-radio-button>
+                </el-radio-group>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="calculator-table__label"><p>Вариант отделки кабины:</p></td>
+            <td>
+              <div>
+                <el-radio-group v-model="steelCoverage" size="small">
+                  <el-radio-button label="Лакокрасочное покрытие">Лакокрасочное покрытие</el-radio-button>
+                  <el-radio-button label="Нержавеющая сталь">Нержавеющая сталь</el-radio-button>
+                </el-radio-group>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="calculator-table__label"><p>МП:</p></td>
+            <td>
+              <div>
+                <el-radio-group v-model="carPlace" size="small">
+                  <el-radio-button label="Без МП">Без МП</el-radio-button>
+                  <el-radio-button label="С машинным помещением">С машинным помещением</el-radio-button>
+                </el-radio-group>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="calculator-table__label">Количество лифтов <br> выбранной конфигурации</td>
+            <td>
+              <el-input-number v-model="count" :min="1" size="mini"></el-input-number>
+              <el-button type="" icon="el-icon-delete" circle @click="count = 1" size="mini"></el-button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+        <aside>
+          <img src="elevator.jpg" class="calculator-elevator" alt="">
+          <p class="calculator-price">Цена: {{ new Intl.NumberFormat().format(price) }} {{ country.currency }}</p>
+          <el-button type="success">Рассчитать стоимость</el-button>
+        </aside>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+  const CURRENCY = {RUB: 'RUB', DOLLAR: '$'};
+  const COUNTRY = {
+    RUSSIA: {
+      id: 'RUSSIA',
+      name: 'Россия',
+      currency: CURRENCY.RUB,
+      price: {
+        below630kg: 1180000,
+        after630kg: 1230000,
+      },
+      floorCost: 20000,
+      fireResistanceCost: 100000,
+      steelCoverageCost: 150000,
+      carPlaceCost: 170000,
+    },
+    EUROPE: {
+      id: 'EUROPE',
+      name: 'Европа',
+      currency: CURRENCY.DOLLAR,
+      price: {
+        below630kg: 33500,
+        after630kg: 36000,
+      },
+      floorCost: 1500,
+      fireResistanceCost: 1000,
+      steelCoverageCost: 1500,
+      carPlaceCost: 2000,
+    },
+    TURKEY: {
+      id: 'TURKEY',
+      name: 'Турция',
+      currency: CURRENCY.DOLLAR,
+      price: {
+        below630kg: 0, // todo
+        after630kg: 27750,
+      },
+      floorCost: 1500,
+      fireResistanceCost: 1000,
+      steelCoverageCost: 1500,
+      carPlaceCost: 2000,
+    },
+    CHINA: {
+      id: 'CHINA',
+      name: 'Китай',
+      currency: CURRENCY.DOLLAR,
+      price: {
+        below630kg: 21000,
+        after630kg: 23000,
+      },
+      floorCost: 1500,
+      fireResistanceCost: 1000,
+      steelCoverageCost: 1500,
+      carPlaceCost: 2000,
+    }
+  };
+  const MAX_WEIGHT_KG = 320;
+  const FLOORS_NUMBER = 2;
+  const FIRE_RESISTANCE_CLASS = {USUAL: 'USUAL', RESIST: 'RESIST'};
+
+  const app = new Vue({
+    el: '#app',
+    data() {
+      return {
+        liftType: 'Пассажирский',
+        selectedCountryName: COUNTRY.RUSSIA.name,
+        //country: COUNTRY.RUSSIA,
+        maxWeightKg: MAX_WEIGHT_KG,
+        floorsNumber: FLOORS_NUMBER,
+        fireResistanceClass: FIRE_RESISTANCE_CLASS.USUAL,
+        steelCoverage: 'Лакокрасочное покрытие', // Нержавеющая сталь
+        carPlace: 'С машинным помещением', // Без МП
+        count: 1,
+      }
+    },
+    computed: {
+      country() {
+        return Object.values(COUNTRY).find(c => c.name === this.selectedCountryName);
+      },
+      price() {
+        const weightPrice = this.maxWeightKg > 630 ? this.country.price.after630kg : this.country.price.below630kg;
+        const floorsNumberPrice = this.country.floorCost * this.floorsNumber;
+        const fireResistancePrice = this.fireResistanceClass === FIRE_RESISTANCE_CLASS.RESIST ? this.country.fireResistanceCost : 0;
+        const steelCoveragePrice = (this.steelCoverage === 'Нержавеющая сталь') ? this.country.steelCoverageCost : 0;
+        const carPlacePrice = (this.carPlace === 'С машинным помещением') ? this.country.carPlaceCost : 0;
+        const currency = this.country.currency;
+
+        return this.count * (weightPrice + floorsNumberPrice + fireResistancePrice + steelCoveragePrice + carPlacePrice);
+      }
+    }
+  });
+</script>
