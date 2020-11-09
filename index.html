@@ -189,7 +189,7 @@
           </tbody>
         </table>
         <aside>
-          <img src="elevator.jpg" class="calculator-elevator" alt="">
+          <img :src="imageUrl" class="calculator-elevator" alt="">
           <p class="calculator-price">Цена: {{ new Intl.NumberFormat().format(price) }} {{ country.currency }}</p>
           <el-button type="danger" disabled>Получить КП</el-button>
           <p><small>Расчёт приблизительный, точный уточняйте у менеджера</small></p>
@@ -277,6 +277,16 @@
       country() {
         return Object.values(COUNTRY).find(c => c.name === this.selectedCountryName);
       },
+      imageUrl() {
+        switch (this.liftType) {
+          case "Пассажирский": return 'http://localhost:63342/lift-calculator/elevator.jpg';
+          case "Грузовой": return 'https://kleemann-eit.ru/images/materials/gryz_lift.jpg';
+          case "Больничный": return 'https://liftobzor.ru/gyazi/bolni_lift/5.jpg';
+          case "Коттеджный": return 'https://i.siteapi.org/OK6Yf6Ua5RBiSvpSC0mN_bLGNzQ=/0x0:850x623/1304cf558b1ade5.s.siteapi.org/img/2azwn1nyb2kg4kwc0go8s0ooco4cgc';
+          case "Панорамный": return 'https://lh3.googleusercontent.com/proxy/pyzmk8UJhL3r0LHilajcuIhb37CrIvTXoFSX34yDSz6LXVODxpryK9Lsn3VUzGS6ARRxpDBhyM7REfgQaoYVRT9gtooquYb_1r8i6GzktbJdp_RypD5qCJjA2wPE2Zd362iU1z233lgibTa5WNoE2bmDXuWONgx1fFXy9bH-WDqj';
+          case "Вакуумный": return 'https://ic.pics.livejournal.com/22sobaki/14753630/71776/71776_600.jpg';
+        }
+      },
       price() {
         const weightPrice = this.maxWeightKg > 630 ? this.country.price.after630kg : this.country.price.below630kg;
         const floorsNumberPrice = this.country.floorCost * this.floorsNumber;
@@ -308,7 +318,6 @@
             case 'Вакуумный': return 1;
           }
         })();
-
         return this.count * ((weightPrice + floorsNumberPrice + fireResistancePrice + steelCoveragePrice + carPlacePrice + floorAdditionalFireResistanceCost + weightAdditionalCost) * multiplier);
       }
     }
