@@ -56,6 +56,7 @@
     align-items: center;
 
     margin-left: 10px;
+    width: 300px;
   }
   .calculator-row aside button {
     width: 100%;
@@ -136,7 +137,7 @@
               <div>
                 <el-slider
                     show-stops
-                    :min="1"
+                    :min="2"
                     :max="22"
                     :step="1"
                     v-model="floorsNumber"
@@ -150,8 +151,8 @@
             <td>
               <div>
                 <el-radio-group v-model="fireResistanceClass" size="small">
-                  <el-radio-button label="USUAL">Нет</el-radio-button>
-                  <el-radio-button label="RESIST">Ei60</el-radio-button>
+                  <el-radio-button label="USUAL">Е30</el-radio-button>
+                  <el-radio-button label="RESIST">E60</el-radio-button>
                 </el-radio-group>
               </div>
             </td>
@@ -190,10 +191,10 @@
         <aside>
           <img src="elevator.jpg" class="calculator-elevator" alt="">
           <p class="calculator-price">Цена: {{ new Intl.NumberFormat().format(price) }} {{ country.currency }}</p>
-          <el-button type="success" disabled>Получить КП</el-button>
+          <el-button type="danger" disabled>Получить КП</el-button>
+          <p><small>Расчёт приблизительный, точный уточняйте у менеджера</small></p>
         </aside>
       </div>
-      <p><small>Расчёт приблизительный, точный уточняйте у менеджера</small></p>
     </div>
   </form>
 </div>
@@ -231,7 +232,7 @@
       name: 'Турция',
       currency: CURRENCY.DOLLAR,
       price: {
-        below630kg: 0, // todo
+        below630kg: 21000,
         after630kg: 27750,
       },
       floorCost: 1500,
@@ -283,8 +284,32 @@
         const steelCoveragePrice = (this.steelCoverage === 'Нержавеющая сталь') ? this.country.steelCoverageCost : 0;
         const carPlacePrice = (this.carPlace === 'С машинным помещением') ? this.country.carPlaceCost : 0;
         const currency = this.country.currency;
+        const floorAdditionalFireResistanceCost = (this.floorsNumber - 1) * ((this.fireResistanceClass === "USUAL" ? 10000 : 20000) * (currency === "RUB" ? 1 : 0.013));
+        const weightForFloor = (() => {
+          switch (+this.maxWeightKg) {
+            case 320: return 0;
+            case 400: return 30000;
+            case 630: return 60000;
+            case 800: return 90000;
+            case 1000: return 120000;
+            case 1250: return 150000;
+            case 1600: return 180000;
+            case 2000: return 210000;
+          }
+        })();
+        const weightAdditionalCost = weightForFloor * (currency === "RUB" ? 1 : 0.013);
+        const multiplier = (() => {
+          switch (this.liftType) {
+            case 'Пассажирский': return 1;
+            case 'Грузовой': return 0.98;
+            case 'Больничный': return 1.03;
+            case 'Коттеджный': return 0.95;
+            case 'Панорамный': return 1.2;
+            case 'Вакуумный': return 1;
+          }
+        })();
 
-        return this.count * (weightPrice + floorsNumberPrice + fireResistancePrice + steelCoveragePrice + carPlacePrice);
+        return this.count * ((weightPrice + floorsNumberPrice + fireResistancePrice + steelCoveragePrice + carPlacePrice + floorAdditionalFireResistanceCost + weightAdditionalCost) * multiplier);
       }
     }
   });
